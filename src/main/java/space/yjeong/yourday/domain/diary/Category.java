@@ -1,4 +1,4 @@
-package space.yjeong.yourday.model.diary;
+package space.yjeong.yourday.domain.diary;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

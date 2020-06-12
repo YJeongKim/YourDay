@@ -1,4 +1,4 @@
-package space.yjeong.yourday.model.todo;
+package space.yjeong.yourday.domain.todo;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="space.yjeong.yourday.dao.UserDao">
+
+    <resultMap type="space.yjeong.yourday.domain.user.User" id="User">
+        <id column="id" property="id" javaType="java.lang.Long" jdbcType="BIGINT" />
+        <result column="email" property="email" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="password" property="password" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="name" property="name" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="birthday" property="birthday" javaType="java.time.LocalDateTime" jdbcType="DATE" />
+        <result column="phone" property="phone" javaType="java.lang.String" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <insert id="save" parameterType="space.yjeong.yourday.domain.user.User" useGeneratedKeys="true" keyProperty="id">
+		insert into user_table(email, password, name, birthday, phone) values(#{email}, #{password}, #{name}, #{birthday}, #{phone})
+	</insert>
+
+    <update id="update" parameterType="space.yjeong.yourday.domain.user.User">
+		update user_table set password=#{password}, birthday=#{birthday}, phone=#{phone} where id=#{id}
+	</update>
+
+    <delete id="delete" parameterType="java.lang.Long">
+		delete from user_table where id=#{id}
+	</delete>
+
+    <select id="findById" parameterType="java.lang.Long" resultMap="User">
+		select * from user_table where id=#{id}
+	</select>
+
+    <select id="findByEmail" parameterType="java.lang.String" resultMap="User">
+        select * from user_table where email=#{email}
+    </select>
+
+    <select id="findAll" resultMap="User">
+		select * from user_table
+	</select>
+
+</mapper>

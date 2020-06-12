@@ -1,4 +1,4 @@
-package space.yjeong.yourday.model.todo;
+package space.yjeong.yourday.domain.diary;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,14 +9,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ToDoDto {
-    private Long id;
+public class DiaryDto {
     private String content;
-    private String status;
+    private String date;
 
     @Override
     public String toString() {
-        return "(content='" + content + '\'' +
-                ", status='" + status + ')';
+        return "content='" + content + '\'' +
+                ", date=" + date;
     }
 }

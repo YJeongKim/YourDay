@@ -1,16 +1,20 @@
 package space.yjeong.yourday;
 
-import space.yjeong.yourday.model.diary.Diary;
-import space.yjeong.yourday.model.diary.DiaryDto;
-import space.yjeong.yourday.model.todo.Status;
-import space.yjeong.yourday.model.todo.ToDo;
-import space.yjeong.yourday.model.todo.ToDoDto;
-import space.yjeong.yourday.model.user.User;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
+import space.yjeong.yourday.domain.diary.Diary;
+import space.yjeong.yourday.domain.diary.DiaryDto;
+import space.yjeong.yourday.domain.todo.Status;
+import space.yjeong.yourday.domain.todo.ToDo;
+import space.yjeong.yourday.domain.todo.ToDoDto;
+import space.yjeong.yourday.domain.user.User;
+import space.yjeong.yourday.exception.EmailDuplicateException;
+import space.yjeong.yourday.exception.PasswordNotMatchingException;
+import space.yjeong.yourday.exception.UserNotFoundException;
 import space.yjeong.yourday.service.DiaryService;
 import space.yjeong.yourday.service.ToDoService;
 import space.yjeong.yourday.service.UserService;
 
-import java.sql.SQLOutput;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -40,12 +44,15 @@ public class Main {
     public static final int DIARY_LIST = 15;
 
     public static String email = null;
-    private static UserService userService = new UserService();
+    private static UserService userService;
     private static ToDoService toDoService = new ToDoService();
     private static DiaryService diaryService = new DiaryService();
     private static Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) {
+        AbstractApplicationContext ctx = new GenericXmlApplicationContext("applicationContext.xml");
+        UserService userServiceImpl = (UserService) ctx.getBean("userService");
+        userService = userServiceImpl;
         while (true) {
             menuStart();
         }
@@ -226,30 +233,34 @@ public class Main {
     }
 
     public static void login() {
-        String id;
-        String pw;
+        String email;
+        String password;
 
         sc.nextLine();
         System.out.println("---------------------------------------------");
         System.out.println("\t\t\t\t< 로그인 >");
-        System.out.print(" ID : ");
-        id = sc.nextLine();
-        System.out.print(" PW : ");
-        pw = sc.nextLine();
+        System.out.print(" EMAIL : ");
+        email = sc.nextLine();
+        System.out.print(" PASSWORD : ");
+        password = sc.nextLine();
 
-        if (userService.signIn(id, pw)) {
-            email = id;
+        try {
+            userService.signIn(email, password);
+//            email = email;
             System.out.println("로그인에 성공하셨습니다. 메인 화면으로 이동합니다.");
             move(MAIN);
-        } else {
-            System.out.println("로그인에 실패하셨습니다. 초기 화면으로 이동합니다.");
+        } catch (UserNotFoundException e) {
+            System.out.println("등록된 회원 정보가 없습니다. 초기 화면으로 이동합니다.");
+            move(START);
+        } catch (PasswordNotMatchingException e) {
+            System.out.println("비밀번호가 일치하지 않습니다. 초기 화면으로 이동합니다.");
             move(START);
         }
     }
 
     public static void join() {
-        String id;
-        String pw;
+        String email;
+        String password;
         String name;
         LocalDateTime birth;
         String phone;
@@ -258,21 +269,23 @@ public class Main {
         System.out.println("----------------------------------------------");
         System.out.println("\t\t\t\t< 회원가입 >");
         System.out.print(" EMAIL : ");
-        id = sc.nextLine();
-        System.out.print(" PW : ");
-        pw = sc.nextLine();
+        email = sc.nextLine();
+        System.out.print(" PASSWORD : ");
+        password = sc.nextLine();
         System.out.print(" 이름 : ");
         name = sc.nextLine();
         birth = inputDate(" 생일(0000-00-00) : ");
         System.out.print(" 전화번호(010-0000-0000) : ");
         phone = sc.nextLine();
 
-        User user = new User(null, id, pw, name, birth, phone);
+        User user = null;
+//                new User(0L, email, password, name, birth, phone);
 
-        if(userService.signUp(user)) {
+        try {
+            userService.signUp(user);
             System.out.println("회원가입에 성공하셨습니다. 초기 화면으로 이동합니다.");
-        } else {
-            System.out.println("회원가입에 실패하셨습니다. 초기 화면으로 이동합니다.");
+        } catch (EmailDuplicateException e) {
+            System.out.println("중복된 이메일이 있어 회원가입에 실패하셨습니다. 초기 화면으로 이동합니다.");
         }
         move(START);
     }
@@ -289,8 +302,9 @@ public class Main {
         System.out.print(" 할 일 : ");
         content = sc.nextLine();
 
-        id = Long.parseLong("" + toDoService.getToDoCount(email, date))+1;
-        ToDo todo = new ToDo(id, content, date, Status.TODO);
+        id = Long.parseLong("" + toDoService.getToDoCount(email, date)) + 1;
+        ToDo todo = null;
+//        new ToDo(id, content, date, Status.TODO);
 
         if (toDoService.writeToDo(todo)) {
             System.out.println("할 일이 추가되었습니다. 할 일 메뉴 화면으로 이동합니다.");
@@ -312,15 +326,16 @@ public class Main {
         System.out.println("--------------------------------------------------------");
         System.out.println("\t\t\t\t\t< 할 일 수정하기 >");
         todoNum = inputMenuNumber(todos.size(), " 수정할 할 일을 선택하세요 : ");
-        todoDto = todos.get(todoNum-1);
+        todoDto = todos.get(todoNum - 1);
         sc.nextLine();
         date = inputDate(" 수정할 날짜(0000-00-00) : ");
         System.out.print(" 수정할 내용 : ");
         content = sc.nextLine();
 
-        if(toDoService.deleteToDo(email, d, todoDto.getId())) {
-            id = Long.parseLong("" + toDoService.getToDoCount(email, date))+1;
-            ToDo todo = new ToDo(id, content, date, Status.TODO);
+        if (toDoService.deleteToDo(email, d, todoDto.getId())) {
+            id = Long.parseLong("" + toDoService.getToDoCount(email, date)) + 1;
+            ToDo todo = null;
+//            new ToDo(id, content, date, Status.TODO);
             if (toDoService.writeToDo(todo)) {
                 System.out.println("할 일 수정이 완료되었습니다. 할 일 메뉴 화면으로 이동합니다.");
                 move(TODO);
@@ -343,7 +358,7 @@ public class Main {
         System.out.println("--------------------------------------------------------");
         System.out.println("\t\t\t\t\t< 할 일 삭제하기 >");
         todoNum = inputMenuNumber(todos.size(), "삭제할 할 일을 선택하세요 : ");
-        todo = todos.get(todoNum-1);
+        todo = todos.get(todoNum - 1);
         System.out.println("정말 할 일을 삭제하시겠습니까?");
         System.out.println(" - 1. 네\n - 2. 아니오");
         menuNum = inputMenuNumber(2, "Input menu number : ");
@@ -375,7 +390,7 @@ public class Main {
             System.out.println(" * 작성된 할 일이 없습니다.");
             move(TODO);
         } else {
-            for (String t : todoList ) {
+            for (String t : todoList) {
                 System.out.println(" - " + t);
             }
             System.out.println();
@@ -386,7 +401,7 @@ public class Main {
                 date = inputDate(" 조회 가능한 날짜를 입력하세요(0000-00-00) : ");
             } while (true);
             System.out.println("==================================================");
-            if (todos == null)  {
+            if (todos == null) {
                 System.out.println(" * 작성된 할 일이 없습니다.");
                 move(TODO);
             } else {
@@ -403,16 +418,16 @@ public class Main {
     public static void diaryWrite() {
         LocalDateTime date;
         String content;
-        Long id = Long.parseLong("" + diaryService.getDiaryCount(email))+1;
+        Long id = Long.parseLong("" + diaryService.getDiaryCount(email)) + 1;
 
         sc.nextLine();
         System.out.println("--------------------------------------------------------");
         System.out.println("\t\t\t\t\t< 다이어리 작성하기 >");
         do {
             date = inputDate(" 작성날짜(0000-00-00) : ");
-            if(diaryService.readDiary(email, date) == null) break;
+            if (diaryService.readDiary(email, date) == null) break;
             System.out.println(" 해당 날짜에 존재하는 다이어리가 있습니다.");
-        } while(true);
+        } while (true);
         System.out.print(" 작성내용 : ");
         content = sc.nextLine();
 
@@ -430,21 +445,21 @@ public class Main {
     public static void diaryUpdate(DiaryDto diaryDto) {
         LocalDateTime date;
         String content;
-        Long id = Long.parseLong("" + diaryService.getDiaryCount(email))+1;
+        Long id = Long.parseLong("" + diaryService.getDiaryCount(email)) + 1;
 
         sc.nextLine();
         System.out.println("--------------------------------------------------------");
         System.out.println("\t\t\t\t\t< 다이어리 수정하기 >");
         do {
             date = inputDate(" 수정할 날짜(0000-00-00) : ");
-            if(diaryService.readDiary(email, date) == null) break;
-            else if(date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")).equals(diaryDto.getDate())) break;
+            if (diaryService.readDiary(email, date) == null) break;
+            else if (date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")).equals(diaryDto.getDate())) break;
             System.out.println(" 해당 날짜에 존재하는 다이어리가 있습니다.");
-        } while(true);
+        } while (true);
         System.out.print(" 수정할 내용 : ");
         content = sc.nextLine();
 
-        if(diaryService.deleteDiary(email, LocalDateTime.of(LocalDate.parse(diaryDto.getDate()), LocalTime.now()))) {
+        if (diaryService.deleteDiary(email, LocalDateTime.of(LocalDate.parse(diaryDto.getDate()), LocalTime.now()))) {
             Diary diary = new Diary(id, content, date, 1L, email);
             if (diaryService.writeDiary(diary)) {
                 System.out.println("다이어리 수정이 완료되었습니다. 다이어리 메뉴 화면으로 이동합니다.");
@@ -492,8 +507,7 @@ public class Main {
         if (diaryList == null) {
             System.out.println(" * 작성된 다이어리가 없습니다.");
             move(DIARY);
-        }
-        else {
+        } else {
             for (String d : diaryList) {
                 System.out.println(" - " + d);
             }
@@ -518,7 +532,7 @@ public class Main {
         while (true) {
             try {
                 menuNum = sc.nextInt();
-                if(menuNum >= 1 && menuNum <= maxNum)
+                if (menuNum >= 1 && menuNum <= maxNum)
                     break;
                 else
                     throw new InputMismatchException();
@@ -548,33 +562,4 @@ public class Main {
         return parseDate;
     }
 
-    public static void testUser(){
-        userService.signUp(
-                new User(null,"test@naver.com","1234","test",LocalDateTime.now(),"010-8757-1048")
-        );
-
-        if(userService.signIn("test@naver.com","1234"))
-            email = "test@naver.com";
-        else
-            System.out.println("로그인 실패");
-
-        userService.updateUser(email, "321", LocalDateTime.now(), "010-5111-4056");
-    }
-
-    public static void testDiary(){
-        diaryService.writeDiary(new Diary(1L,"test2", LocalDateTime.now(),1L,email));
-        System.out.println("### 작성한 다이어리 조회 ###");
-        System.out.println(diaryService.readDiary(email, LocalDateTime.now()));
-        System.out.println("### 작성한 다이어리 목록 조회 ###");
-        System.out.println(diaryService.readDiaries(email));
-    }
-
-
-    public static void testTodo(){
-        toDoService.writeToDo(new ToDo(1L, "양치하기", LocalDateTime.now(), Status.DOING));
-        toDoService.writeToDo(new ToDo(2L, "잠자기", LocalDateTime.now(), Status.TODO));
-        System.out.println("### 할 일 조회 ###");
-        System.out.println(toDoService.readToDoList(LocalDateTime.now()).toString());
-        System.out.println(toDoService.readToDo("2020","05","24", 2L).toString());
-    }
 }

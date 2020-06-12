@@ -1,4 +1,4 @@
-package space.yjeong.yourday.model.user;
+package space.yjeong.yourday.domain.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,9 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -25,11 +25,4 @@ public class User {
         this.phone = phone;
     }
 
-    public String toFileData(){
-        return email + "\n"
-                + password + "\n"
-                + name + "\n"
-                + birthday.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+ "\n"
-                + phone + "\n";
-    }
 }

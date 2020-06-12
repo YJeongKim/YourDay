@@ -1,5 +1,6 @@
-package space.yjeong.yourday.model.diary;
+package space.yjeong.yourday.domain.todo;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -8,27 +9,24 @@ import java.time.format.DateTimeFormatter;
 
 @Getter
 @NoArgsConstructor
-public class Diary {
+@AllArgsConstructor
+public class ToDo {
     private Long id;
     private String content;
     private LocalDateTime date;
-    private Long categoryId;
-    private String userEmail;
+    private Status status;
 
-    public Diary(Long id, String content, LocalDateTime date, Long categoryId, String userEmail) {
-        this.id = id;
+    public void update(String content, LocalDateTime date, Status status) {
         this.content = content;
         this.date = date;
-        this.categoryId = categoryId;
-        this.userEmail= userEmail;
+        this.status = status;
     }
 
-    public String toFileData(){
+    public String toFileData() {
         return id.toString() + "\n"
                 + content + "\n"
                 + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+ "\n"
-                + categoryId.toString() + "\n"
-                + userEmail + "\n";
+                + status.toString() + "\n";
     }
 
 }
