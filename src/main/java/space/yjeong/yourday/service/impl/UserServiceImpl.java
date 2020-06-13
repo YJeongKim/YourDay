@@ -35,8 +35,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUserInfo(User newInfoUser) {
-        getById(newInfoUser.getId());
-        userDao.update(newInfoUser);
+        try {
+            getById(newInfoUser.getId());
+            userDao.update(newInfoUser);
+        } catch (UserNotFoundException e) {
+            throw e;
+        }
     }
 
     @Override

@@ -18,4 +18,10 @@ public class User {
     private String name;
     private LocalDate birthday;
     private String phone;
+
+    public void update(String password, LocalDate birthday, String phone) {
+        this.password = password;
+        this.birthday = birthday;
+        this.phone = phone;
+    }
 }

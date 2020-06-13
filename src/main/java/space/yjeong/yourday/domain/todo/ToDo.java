@@ -3,30 +3,23 @@ package space.yjeong.yourday.domain.todo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ToDo {
     private Long id;
     private String content;
-    private LocalDateTime date;
+    private LocalDate date;
     private Status status;
+    private Long userId;
 
-    public void update(String content, LocalDateTime date, Status status) {
+    public void update(String content, LocalDate date) {
         this.content = content;
         this.date = date;
-        this.status = status;
     }
-
-    public String toFileData() {
-        return id.toString() + "\n"
-                + content + "\n"
-                + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+ "\n"
-                + status.toString() + "\n";
-    }
-
 }

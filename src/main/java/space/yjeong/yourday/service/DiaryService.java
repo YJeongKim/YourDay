@@ -1,7 +1,6 @@
 package space.yjeong.yourday.service;
 
 import space.yjeong.yourday.domain.diary.Diary;
-import space.yjeong.yourday.domain.diary.DiaryDto;
 
 import java.time.LocalDate;
 import java.util.List;

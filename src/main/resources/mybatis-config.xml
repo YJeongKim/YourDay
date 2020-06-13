@@ -4,9 +4,11 @@
 <typeAliases>
     <typeAlias type="space.yjeong.yourday.domain.user.User" alias="User" />
     <typeAlias type="space.yjeong.yourday.domain.diary.Diary" alias="Diary" />
+    <typeAlias type="space.yjeong.yourday.domain.todo.ToDo" alias="ToDo" />
 </typeAliases>
 <mappers>
     <mapper resource="mapper/UserMapper.xml" />
     <mapper resource="mapper/DiaryMapper.xml" />
+    <mapper resource="mapper/ToDoMapper.xml" />
 </mappers>
 </configuration>

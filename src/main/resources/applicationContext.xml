@@ -31,5 +31,12 @@
     <bean id="diaryService" class="space.yjeong.yourday.service.impl.DiaryServiceImpl">
         <property name="diaryDao" ref="diaryMapper" />
     </bean>
+    <bean id="todoMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="space.yjeong.yourday.dao.ToDoDao" />
+        <property name="sqlSessionFactory" ref="sqlSessionFactory" />
+    </bean>
+    <bean id="todoService" class="space.yjeong.yourday.service.impl.ToDoServiceImpl">
+        <property name="todoDao" ref="todoMapper" />
+    </bean>
 
 </beans>

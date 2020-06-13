@@ -3,21 +3,17 @@ package space.yjeong.yourday;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import space.yjeong.yourday.domain.diary.Diary;
-import space.yjeong.yourday.domain.diary.DiaryDto;
+import space.yjeong.yourday.domain.todo.Status;
 import space.yjeong.yourday.domain.todo.ToDo;
-import space.yjeong.yourday.domain.todo.ToDoDto;
 import space.yjeong.yourday.domain.user.User;
 import space.yjeong.yourday.exception.*;
 import space.yjeong.yourday.service.DiaryService;
-import space.yjeong.yourday.service.impl.DiaryServiceImpl;
 import space.yjeong.yourday.service.ToDoService;
 import space.yjeong.yourday.service.UserService;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
@@ -43,14 +39,14 @@ public class Main {
 
     public static Long loginUser = null;
     private static UserService userService;
-    private static ToDoService todoService = new ToDoService();
+    private static ToDoService todoService;
     private static DiaryService diaryService;
     private static Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) {
         AbstractApplicationContext ctx = new GenericXmlApplicationContext("applicationContext.xml");
         userService = (UserService) ctx.getBean("userService");
-//        todoService = (ToDoService) ctx.getBean("todoService");
+        todoService = (ToDoService) ctx.getBean("todoService");
         diaryService = (DiaryService) ctx.getBean("diaryService");
 
         while (true) {
@@ -157,24 +153,6 @@ public class Main {
         }
     }
 
-    public static void menuToDoList(ToDoDto todo) {
-        int menuNum;
-        while (true) {
-            System.out.println(" - 1. 할 일 수정하기\n - 2. 할 일 삭제하기\n - 3. 뒤로가기");
-            menuNum = inputMenuNumber(3, "Input menu number : ");
-            switch (menuNum) {
-                case 1:
-//                    todoUpdate(todo);
-                    break;
-                case 2:
-//                    todoDelete(todo);
-                    break;
-                case 3:
-                    return;
-            }
-        }
-    }
-
     public static void menuDiary() {
         int menuNum;
         while (true) {
@@ -195,19 +173,20 @@ public class Main {
         }
     }
 
-    public static void menuToDoList(List<ToDoDto> todos, LocalDateTime date) {
+    public static void menuToDoList(List<ToDo> todos) {
         int menuNum;
         while (true) {
             System.out.println(" - 1. 할 일 수정하기\n - 2. 진행상태 수정하기\n - 3. 할 일 삭제하기\n - 4. 뒤로가기");
             menuNum = inputMenuNumber(4, "Input menu number : ");
             switch (menuNum) {
                 case 1:
-                    todoUpdate(todos, date);
+                    todoUpdate(todos);
                     break;
                 case 2:
+                    todoStatus(todos);
                     break;
                 case 3:
-                    todoDelete(todos, date);
+                    todoDelete(todos);
                     break;
                 case 4:
                     return;
@@ -293,7 +272,6 @@ public class Main {
     public static void todoWrite() {
         LocalDate date;
         String content;
-        Long id;
 
         sc.nextLine();
         System.out.println("--------------------------------------------------------");
@@ -302,57 +280,77 @@ public class Main {
         System.out.print(" 할 일 : ");
         content = sc.nextLine();
 
-//        id = Long.parseLong("" + todoService.getToDoCount(email, date)) + 1;
-        ToDo todo = null;
-//        new ToDo(id, content, date, Status.TODO);
-
-        if (todoService.writeToDo(todo)) {
-            System.out.println("할 일이 추가되었습니다. 할 일 메뉴 화면으로 이동합니다.");
-            move(TODO);
-        } else {
-            System.out.println("할 일 추가가 실패되었습니다. 다시 할 일을 작성하세요.");
-            move(TODO_WRITE);
-        }
+        ToDo todo = new ToDo(0L, content, date, Status.TODO, loginUser);
+        todoService.writeToDo(todo);
+        System.out.println("할 일이 추가되었습니다. 할 일 메뉴 화면으로 이동합니다.");
+        move(TODO);
     }
 
-    public static void todoUpdate(List<ToDoDto> todos, LocalDateTime d) {
-        String content;
+    public static void todoUpdate(List<ToDo> todos) {
         int todoNum;
-        Long id;
-        ToDoDto todoDto;
         LocalDate date;
+        String content;
+        ToDo todo;
 
         sc.nextLine();
         System.out.println("--------------------------------------------------------");
         System.out.println("\t\t\t\t\t< 할 일 수정하기 >");
         todoNum = inputMenuNumber(todos.size(), " 수정할 할 일을 선택하세요 : ");
-        todoDto = todos.get(todoNum - 1);
+        todo = todos.get(todoNum - 1);
         sc.nextLine();
         date = inputDate(" 수정할 날짜(0000-00-00) : ");
         System.out.print(" 수정할 내용 : ");
         content = sc.nextLine();
 
-//        if (todoService.deleteToDo(email, d, todoDto.getId())) {
-//            id = Long.parseLong("" + todoService.getToDoCount(email, date)) + 1;
-//            ToDo todo = null;
-////            new ToDo(id, content, date, Status.TODO);
-//            if (todoService.writeToDo(todo)) {
-//                System.out.println("할 일 수정이 완료되었습니다. 할 일 메뉴 화면으로 이동합니다.");
-//                move(TODO);
-//            } else {
-//                System.out.println("할 일 수정에 실패하셨습니다. 다시 할 일을 수정하세요.");
-//                move(TODO_UPDATE);
-//            }
-//        } else {
-//            System.out.println("할 일 수정에 실패하셨습니다. 할 일 메뉴 화면으로 이동합니다.");
-//            move(TODO);
-//        }
+        todo.update(content, date);
+        try {
+            todoService.updateToDo(todo);
+            System.out.println("할 일 수정이 완료되었습니다. 할 일 메뉴 화면으로 이동합니다.");
+            move(TODO);
+        } catch (ToDoNotFoundException e) {
+            System.out.println("할 일 수정에 실패하셨습니다. 할 일 메뉴 화면으로 이동합니다.");
+            move(TODO);
+        }
     }
 
-    public static void todoDelete(List<ToDoDto> todos, LocalDateTime date) {
-        int menuNum;
+    public static void todoStatus(List<ToDo> todos) {
         int todoNum;
-        ToDoDto todo;
+        int statusNum;
+        ToDo todo;
+
+        sc.nextLine();
+        System.out.println("--------------------------------------------------------");
+        System.out.println("\t\t\t\t\t< 할 일 수정하기 >");
+        todoNum = inputMenuNumber(todos.size(), " 수정할 할 일을 선택하세요 : ");
+        todo = todos.get(todoNum - 1);
+
+        System.out.println(" - 1. " + Status.TODO.getTitle() + "\n - 2. " + Status.DOING.getTitle() + "\n - 3. " + Status.DONE.getTitle());
+        statusNum = inputMenuNumber(3, " 현재 진행 상태를 선택하세요 : ");
+        Status status = todo.getStatus();
+        switch (statusNum) {
+            case 1:
+                status = Status.TODO;
+                break;
+            case 2:
+                status = Status.DOING;
+                break;
+            case 3:
+                status = Status.DONE;
+                break;
+        }
+        try {
+            todoService.changeStatus(todo.getId(), status);
+            System.out.println("할 일 수정이 완료되었습니다. 할 일 메뉴 화면으로 이동합니다.");
+        } catch (ToDoNotFoundException e) {
+            System.out.println("할 일 수정에 실패하셨습니다. 할 일 메뉴 화면으로 이동합니다.");
+        }
+        move(TODO);
+    }
+
+    public static void todoDelete(List<ToDo> todos) {
+        int selectNum;
+        int todoNum;
+        ToDo todo;
 
         sc.nextLine();
         System.out.println("--------------------------------------------------------");
@@ -361,57 +359,66 @@ public class Main {
         todo = todos.get(todoNum - 1);
         System.out.println("정말 할 일을 삭제하시겠습니까?");
         System.out.println(" - 1. 네\n - 2. 아니오");
-        menuNum = inputMenuNumber(2, "Input menu number : ");
-//        switch (menuNum) {
-//            case 1:
-//                if (todoService.deleteToDo(email, date, todo.getId())) {
-//                    System.out.println("할 일 삭제가 완료되었습니다. 할 일 메뉴 화면으로 이동합니다.");
-//                } else {
-//                    System.out.println("할 일 삭제에 실패하셨습니다. 할 일 메뉴 화면으로 이동합니다.");
-//                }
-//                move(TODO);
-//                break;
-//            case 2:
-//                System.out.println("할 일 삭제가 취소되었습니다. 할 일 메뉴 화면으로 이동합니다.");
-//                move(TODO);
-//                break;
-//        }
+        selectNum = inputMenuNumber(2, "Input select number : ");
+        switch (selectNum) {
+            case 1:
+                try {
+                    todoService.delete(todo.getId());
+                    System.out.println("할 일 삭제가 완료되었습니다. 할 일 메뉴 화면으로 이동합니다.");
+                } catch (ToDoNotFoundException e) {
+                    System.out.println("할 일 삭제에 실패하셨습니다. 할 일 메뉴 화면으로 이동합니다.");
+                }
+                break;
+            case 2:
+                System.out.println("할 일 삭제가 취소되었습니다. 할 일 메뉴 화면으로 이동합니다.");
+                break;
+        }
+        move(TODO);
     }
 
     public static void todoList() {
-        LocalDateTime date;
-        List<ToDoDto> todos;
+        List<ToDo> todosDate = null;
+        LocalDate date;
 
         sc.nextLine();
         System.out.println("--------------------------------------------------------");
         System.out.println("\t\t\t\t\t< 할 일 조회 >");
-        List<String> todoList = todoService.readAllToDo();
-        if (todoList == null) {
-            System.out.println(" * 작성된 할 일이 없습니다.");
-            move(TODO);
-        } else {
-            for (String t : todoList) {
-                System.out.println(" - " + t);
+        try {
+            List<ToDo> todos = todoService.getAllByUserId(loginUser);
+            List<LocalDate> dateList = new ArrayList<>();
+            for(ToDo td : todos) {
+                if(!dateList.contains(td.getDate())) {
+                    dateList.add(td.getDate());
+                }
+            }
+            for(LocalDate d : dateList) {
+                System.out.println(" - " + d.toString());
             }
             System.out.println();
-//            date = inputDate(" 조회할 날짜를 입력하세요(0000-00-00) : ");
-//            do {
-//                todos = todoService.readToDoList(date);
-//                if (todos != null) break;
-//                date = inputDate(" 조회 가능한 날짜를 입력하세요(0000-00-00) : ");
-//            } while (true);
-//            System.out.println("==================================================");
-//            if (todos == null) {
-//                System.out.println(" * 작성된 할 일이 없습니다.");
-//                move(TODO);
-//            } else {
-//                int i = 0;
-//                for (ToDoDto todo : todos) {
-//                    System.out.println(" [" + ++i + "] " + todo.getContent() + " (" + todo.getStatus() + ")");
-//                }
-//            }
-//            System.out.println("==================================================");
-//            menuToDoList(todos, date);
+
+            date = inputDate(" 조회할 날짜를 입력하세요(0000-00-00) : ");
+            do {
+                if(dateList.contains(date)) break;
+                else date = inputDate(" 조회 가능한 날짜를 입력하세요(0000-00-00) : ");
+            } while (true);
+
+            try {
+                todosDate = todoService.getAllByUserIdAndDate(loginUser, date);
+            } catch (ToDoNotWrittenException e) {
+                System.out.println(" 해당 날짜에 존재하는 할 일이 없습니다.");
+                move(TODO);
+            }
+
+            System.out.println("==================================================");
+            int i=0;
+            for(ToDo toDo : todosDate) {
+                System.out.println(" [" + ++i + "] " + toDo.getContent() + " (" + toDo.getStatus().getTitle()+ ")");
+            }
+            System.out.println("==================================================");
+            menuToDoList(todosDate);
+        } catch (ToDoNotWrittenException e) {
+            System.out.println(" * 작성된 할 일이 없습니다.");
+            move(TODO);
         }
     }
 
@@ -478,6 +485,7 @@ public class Main {
 
     public static void diaryDelete(Diary diary) {
         int selectNum;
+
         System.out.println(" 정말 다이어리를 삭제하시겠습니까?");
         System.out.println(" - 1. 네\n - 2. 아니오");
         selectNum = inputMenuNumber(2, "Input select number : ");
@@ -546,7 +554,7 @@ public class Main {
                     throw new InputMismatchException();
             } catch (InputMismatchException e) {
                 sc.nextLine();
-                System.out.println("*잘못 입력하였습니다. 다시 입력하세요.");
+                System.out.println("* 잘못 입력하였습니다. 다시 입력하세요.");
                 System.out.print(message);
             }
         }
@@ -563,7 +571,7 @@ public class Main {
                 parseDate = LocalDate.parse(date);
                 break;
             } catch (DateTimeParseException e) {
-                System.out.println("*잘못된 날짜 형식입니다. 다시 입력하세요.");
+                System.out.println("* 잘못된 날짜 형식입니다. 다시 입력하세요.");
                 System.out.print(message);
             }
         }

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="space.yjeong.yourday.dao.ToDoDao">
+
+    <resultMap type="space.yjeong.yourday.domain.todo.ToDo" id="ToDo">
+        <id column="id" property="id" javaType="java.lang.Long" jdbcType="BIGINT" />
+        <result column="content" property="content" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="date" property="date" javaType="java.time.LocalDate" jdbcType="DATE" />
+        <result column="status" property="status" javaType="space.yjeong.yourday.domain.todo.Status" jdbcType="VARCHAR" />
+        <result column="user_id" property="userId" javaType="java.lang.Long" jdbcType="BIGINT" />
+    </resultMap>
+
+    <insert id="save" parameterType="space.yjeong.yourday.domain.todo.ToDo" useGeneratedKeys="true" keyProperty="id">
+		insert into todo_table(content, date, status, user_id) values(#{content}, #{date}, #{status}, #{userId})
+	</insert>
+
+    <update id="update" parameterType="space.yjeong.yourday.domain.todo.ToDo">
+		update todo_table set content=#{content}, date=#{date}, status=#{status} where id=#{id}
+	</update>
+
+    <update id="updateStatus" parameterType="map">
+		update todo_table set status=#{status} where id=#{id}
+	</update>
+
+    <delete id="delete" parameterType="java.lang.Long">
+		delete from todo_table where id=#{id}
+	</delete>
+
+    <select id="findById" parameterType="java.lang.Long" resultMap="ToDo">
+		select * from todo_table where id=#{id}
+	</select>
+
+
+    <select id="findAllByUserId" parameterType="java.lang.Long" resultMap="ToDo">
+		select * from todo_table where user_id=#{userId}
+	</select>
+
+    <select id="findAllByUserIdAndDate" parameterType="map" resultMap="ToDo">
+		select * from todo_table where user_id=#{userId} and date=#{date}
+	</select>
+
+</mapper>
