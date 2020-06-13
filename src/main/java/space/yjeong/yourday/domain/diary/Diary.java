@@ -1,34 +1,25 @@
 package space.yjeong.yourday.domain.diary;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
 
 @Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Diary {
     private Long id;
     private String content;
-    private LocalDateTime date;
-    private Long categoryId;
-    private String userEmail;
+    private LocalDate date;
+    private int categoryId;
+    private Long userId;
 
-    public Diary(Long id, String content, LocalDateTime date, Long categoryId, String userEmail) {
-        this.id = id;
+    public void update(String content, LocalDate date) {
         this.content = content;
         this.date = date;
-        this.categoryId = categoryId;
-        this.userEmail= userEmail;
     }
-
-    public String toFileData(){
-        return id.toString() + "\n"
-                + content + "\n"
-                + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+ "\n"
-                + categoryId.toString() + "\n"
-                + userEmail + "\n";
-    }
-
 }

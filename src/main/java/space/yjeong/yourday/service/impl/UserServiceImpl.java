@@ -1,6 +1,5 @@
 package space.yjeong.yourday.service.impl;
 
-
 import space.yjeong.yourday.dao.UserDao;
 import space.yjeong.yourday.domain.user.User;
 import space.yjeong.yourday.exception.EmailDuplicateException;
@@ -19,8 +18,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void signUp(User user) {
-        if(getByEmail(user.getEmail())!=null) throw new EmailDuplicateException();
-        userDao.save(user);
+        try {
+            if(getByEmail(user.getEmail()) != null)
+                throw new EmailDuplicateException();
+        } catch (UserNotFoundException e) {
+            userDao.save(user);
+        }
     }
 
     @Override
@@ -32,9 +35,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUserInfo(User newInfoUser) {
-        User user = getByEmail(newInfoUser.getEmail());
-        user.update(newInfoUser.getPassword(), newInfoUser.getBirthday(), newInfoUser.getPhone());
-        userDao.update(user);
+        getById(newInfoUser.getId());
+        userDao.update(newInfoUser);
     }
 
     @Override

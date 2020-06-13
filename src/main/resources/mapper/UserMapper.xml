@@ -8,7 +8,7 @@
         <result column="email" property="email" javaType="java.lang.String" jdbcType="VARCHAR" />
         <result column="password" property="password" javaType="java.lang.String" jdbcType="VARCHAR" />
         <result column="name" property="name" javaType="java.lang.String" jdbcType="VARCHAR" />
-        <result column="birthday" property="birthday" javaType="java.time.LocalDateTime" jdbcType="DATE" />
+        <result column="birthday" property="birthday" javaType="java.time.LocalDate" jdbcType="DATE" />
         <result column="phone" property="phone" javaType="java.lang.String" jdbcType="VARCHAR" />
     </resultMap>
 

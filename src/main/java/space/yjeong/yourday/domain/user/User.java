@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -16,13 +16,6 @@ public class User {
     private String email;
     private String password;
     private String name;
-    private LocalDateTime birthday;
+    private LocalDate birthday;
     private String phone;
-
-    public void update(String password, LocalDateTime birthday, String phone) {
-        this.password = password;
-        this.birthday = birthday;
-        this.phone = phone;
-    }
-
 }

@@ -3,8 +3,10 @@
 <configuration>
 <typeAliases>
     <typeAlias type="space.yjeong.yourday.domain.user.User" alias="User" />
+    <typeAlias type="space.yjeong.yourday.domain.diary.Diary" alias="Diary" />
 </typeAliases>
 <mappers>
     <mapper resource="mapper/UserMapper.xml" />
+    <mapper resource="mapper/DiaryMapper.xml" />
 </mappers>
 </configuration>

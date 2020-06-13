@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="space.yjeong.yourday.dao.DiaryDao">
+
+    <resultMap type="space.yjeong.yourday.domain.diary.Diary" id="Diary">
+        <id column="id" property="id" javaType="java.lang.Long" jdbcType="BIGINT" />
+        <result column="content" property="content" javaType="java.lang.String" jdbcType="LONGVARCHAR" />
+        <result column="date" property="date" javaType="java.time.LocalDate" jdbcType="DATE" />
+        <result column="category_id" property="categoryId" javaType="int" jdbcType="INTEGER" />
+        <result column="user_id" property="userId" javaType="java.lang.Long" jdbcType="BIGINT" />
+    </resultMap>
+
+    <insert id="save" parameterType="space.yjeong.yourday.domain.diary.Diary" useGeneratedKeys="true" keyProperty="id">
+		insert into diary_table(content, date, category_id, user_id) values(#{content}, #{date}, #{categoryId}, #{userId})
+	</insert>
+
+    <update id="update" parameterType="space.yjeong.yourday.domain.diary.Diary">
+		update diary_table set content=#{content}, date=#{date}, category_id=#{categoryId} where id=#{id}
+	</update>
+
+    <delete id="delete" parameterType="java.lang.Long">
+		delete from diary_table where id=#{id}
+	</delete>
+
+    <select id="findById" parameterType="java.lang.Long" resultMap="Diary">
+		select * from diary_table where id=#{id}
+	</select>
+
+    <select id="findByUserIdAndDate" parameterType="map" resultMap="Diary">
+		select * from diary_table where user_id=#{userId} and date=#{date}
+	</select>
+
+    <select id="findAllByUserId" parameterType="java.lang.Long" resultMap="Diary">
+		select * from diary_table where user_id=#{userId}
+	</select>
+
+</mapper>
