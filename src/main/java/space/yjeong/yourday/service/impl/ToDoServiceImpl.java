@@ -1,5 +1,7 @@
 package space.yjeong.yourday.service.impl;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import space.yjeong.yourday.dao.ToDoDao;
 import space.yjeong.yourday.domain.todo.Status;
 import space.yjeong.yourday.domain.todo.ToDo;
@@ -10,6 +12,7 @@ import space.yjeong.yourday.service.ToDoService;
 import java.time.LocalDate;
 import java.util.List;
 
+@Service
 public class ToDoServiceImpl implements ToDoService {
     private ToDoDao todoDao;
 
@@ -17,11 +20,13 @@ public class ToDoServiceImpl implements ToDoService {
         this.todoDao = todoDao;
     }
 
+    @Transactional
     @Override
     public void writeToDo(ToDo todo) {
         todoDao.save(todo);
     }
 
+    @Transactional
     @Override
     public void updateToDo(ToDo updateToDo) {
         try {
@@ -32,6 +37,7 @@ public class ToDoServiceImpl implements ToDoService {
         }
     }
 
+    @Transactional
     @Override
     public void delete(Long id) {
         if(getById(id) != null)
@@ -59,6 +65,7 @@ public class ToDoServiceImpl implements ToDoService {
         return todos;
     }
 
+    @Transactional
     @Override
     public void changeStatus(Long id, Status status) {
         try {

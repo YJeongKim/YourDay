@@ -1,5 +1,7 @@
 package space.yjeong.yourday.service.impl;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import space.yjeong.yourday.dao.DiaryDao;
 import space.yjeong.yourday.domain.diary.Diary;
 import space.yjeong.yourday.exception.DiaryNotFoundException;
@@ -10,6 +12,7 @@ import space.yjeong.yourday.service.DiaryService;
 import java.time.LocalDate;
 import java.util.List;
 
+@Service
 public class DiaryServiceImpl implements DiaryService {
     private DiaryDao diaryDao;
 
@@ -17,12 +20,14 @@ public class DiaryServiceImpl implements DiaryService {
         this.diaryDao = diaryDao;
     }
 
+    @Transactional
     @Override
     public void writeDiary(Diary diary) {
         checkByUserIdAndDate(diary.getUserId(), diary.getDate());
         diaryDao.save(diary);
     }
 
+    @Transactional
     @Override
     public void updateDiary(Diary updateDiary) {
         Diary diary = getById(updateDiary.getId());
@@ -31,6 +36,7 @@ public class DiaryServiceImpl implements DiaryService {
         diaryDao.update(updateDiary);
     }
 
+    @Transactional
     @Override
     public void delete(Long id) {
         if (getById(id) != null)

@@ -1,5 +1,7 @@
 package space.yjeong.yourday.service.impl;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import space.yjeong.yourday.dao.UserDao;
 import space.yjeong.yourday.domain.user.User;
 import space.yjeong.yourday.exception.EmailDuplicateException;
@@ -9,6 +11,7 @@ import space.yjeong.yourday.service.UserService;
 
 import java.util.List;
 
+@Service
 public class UserServiceImpl implements UserService {
     private UserDao userDao;
 
@@ -16,6 +19,7 @@ public class UserServiceImpl implements UserService {
         this.userDao = userDao;
     }
 
+    @Transactional
     @Override
     public void signUp(User user) {
         try {
@@ -33,6 +37,7 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    @Transactional
     @Override
     public void updateUserInfo(User newInfoUser) {
         try {
@@ -43,6 +48,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Transactional
     @Override
     public void delete(Long id) {
         if(getById(id)!=null)
